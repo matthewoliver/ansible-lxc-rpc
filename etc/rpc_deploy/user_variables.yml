@@ -144,3 +144,6 @@ rpc_support_holland_password:
 ## Kibana Options
 kibana_password:
 
+# Swift Options:
+swift_service_password:
+

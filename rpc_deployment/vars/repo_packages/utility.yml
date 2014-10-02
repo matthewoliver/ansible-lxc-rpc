@@ -28,3 +28,5 @@ service_pip_dependencies:
   - python-neutronclient
   - python-novaclient
   - python-swiftclient
+  - python-memcached
+  - pycrypto

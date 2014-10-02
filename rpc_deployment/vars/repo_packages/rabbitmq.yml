@@ -24,3 +24,7 @@ apt_container_repos:
 container_packages:
   - rabbitmq-server
   - erlang
+
+service_pip_dependencies:
+  - python-memcached
+  - pycrypto

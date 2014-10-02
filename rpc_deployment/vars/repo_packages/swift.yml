@@ -22,7 +22,7 @@ git_repo: https://git.openstack.org/openstack/swift
 git_fallback_repo: https://github.com/openstack/swift
 git_dest: "/opt/{{ repo_path }}"
 git_etc_example: etc/
-git_install_branch: b223322ed1ef44f61490f820240aa01f1047ae2e
+git_install_branch: master
 
 service_pip_dependencies:
   - pywbem

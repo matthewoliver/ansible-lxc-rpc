@@ -13,22 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- name: Ensure rpc support packages are installed
-  apt:
-    pkg: "{{ item }}"
-    state: present
-    update_cache: yes
-    cache_valid_time: 600
-  with_items:
-    - vim
-    - linux-crashdump
-    - iotop
-    - dstat
-    - tcpdump
-    - lsof
-    - htop
-  register: rpc_support_packages
-  until: rpc_support_packages|success
-  retries: 3
-  tags:
-    - support_packages
+- hosts: keystone
+  user: root
+  roles:
+    - common
+    - common_sudoers
+    - container_common
+    - keystone_common
+    - openstack_common
+    - openstack_openrc
+    - galera_client_cnf
+  vars_files:
+    - vars/repo_packages/keystone.yml
+    - vars/config_vars/keystone_config.yml
+    - vars/openstack_service_vars/keystone.yml

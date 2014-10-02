@@ -14,14 +14,13 @@
 # limitations under the License.
 
 - include: openstack-common.yml
-- include: keystone.yml
-- include: keystone-add-all-services.yml
+- include: keystone-all.yml
 - include: glance-all.yml
 - include: heat-all.yml
 - include: nova-all.yml
 - include: neutron-all.yml
 - include: cinder-all.yml
 - include: horizon-all.yml
-- include: utility.yml
-- include: rpc-support.yml
+- include: utility-all.yml
+- include: rpc-support-all.yml
 - include: ../infrastructure/rsyslog-config.yml

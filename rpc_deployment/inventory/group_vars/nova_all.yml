@@ -39,7 +39,7 @@ container_database: nova
 rpc_backend: nova.openstack.common.rpc.impl_kombu
 
 ## Nova virtualization Type, set to KVM if supported
-virt_type: "{{ nova_virt_type|default('qemu') }}"
+virt_type: "{{ nova_virt_type|default('kvm') }}"
 
 ## Nova Auth
 service_admin_tenant_name: "service"
@@ -67,21 +67,24 @@ nova_firewall_driver: nova.virt.firewall.NoopFirewallDriver
 nova_compute_driver: libvirt.LibvirtDriver
 nova_max_age: 0
 
-## Git Source
-## ALL of this has been relocated to vars/repo_packages
-## TODO(someone) this should be removed once the repo bits are all figured out.
-git_repo: https://git.openstack.org/openstack/nova
-git_fallback_repo: https://github.com/openstack/nova
-git_etc_example: etc/nova/
-git_install_branch: 9ada982ccdb974d43c1c94e59eb4b84e35a7997d
-
-service_pip_dependencies:
-  - MySQL-python
-  - python-memcached
-  - pycrypto
-  - python-keystoneclient
-  - python-novaclient
-  - keystonemiddleware
+# Nova Scheduler
+nova_cpu_allocation_ratio: 5.0
+nova_disk_allocation_ratio: 1.0
+nova_max_instances_per_host: 50
+nova_max_io_ops_per_host: 10
+nova_ram_allocation_ratio: 1.5
+nova_ram_weight_multiplier: 5.0
+nova_reserved_host_disk_mb: 2048
+nova_reserved_host_memory_mb: 2048
+nova_scheduler_driver: nova.scheduler.filter_scheduler.FilterScheduler
+nova_scheduler_available_filters: nova.scheduler.filters.all_filters
+nova_scheduler_default_filters: RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter
+nova_scheduler_driver_task_period: 60
+nova_scheduler_host_manager: nova.scheduler.host_manager.HostManager
+nova_scheduler_host_subset_size: 10
+nova_scheduler_manager: nova.scheduler.manager.SchedulerManager
+nova_scheduler_max_attempts: 5
+nova_scheduler_weight_classes: nova.scheduler.weights.all_weighers
 
 container_directories:
   - /var/log/nova
@@ -92,9 +95,3 @@ container_directories:
   - /var/cache/nova
   - /var/lock/nova
   - /var/run/nova
-
-container_packages:
-  - libpq-dev
-  - open-iscsi
-  - vlan
-  - kpartx

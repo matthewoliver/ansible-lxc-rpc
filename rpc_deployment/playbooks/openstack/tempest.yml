@@ -13,13 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This playbook deploys Glance-Registry.
-- hosts: glance_registry
-  user: root
-  roles:
-    - glance_common
-    - init_script
+# Configure tempest on the utility containers
+
+- hosts: utility_all
+  vars:
+    service_name: tempest
   vars_files:
-    - vars/openstack_service_vars/glance_registry.yml
-  handlers:
-    - include: handlers/services.yml
+    - vars/repo_packages/tempest.yml
+  roles:
+    - common
+    - openstack_common
+    - openstack_openrc
+
+# Openstack resources only need to be created once
+- hosts: utility_all[0]
+  roles:
+    - tempest_resources
+
+# Tempest is installed and configured in all utility containers
+- hosts: utility_all
+  vars_files:
+    - vars/repo_packages/tempest.yml
+  roles:
+    - tempest
+
+

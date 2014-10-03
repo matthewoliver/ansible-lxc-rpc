@@ -1,4 +1,4 @@
----
+#!/usr/bin/env bash
 # Copyright 2014, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- hosts: glance_all:cinder_all
-  user: root
-  roles:
-    - common
-    - container_common
-    - openstack_common
-    - openstack_openrc
+# Script for running gate tests. Initially very sparse
+# additional projects and test types will be added over time.
+
+set -e
+set -x
+
+API_TESTS="identity"
+
+pushd /opt/tempest_*
+source /root/openrc
+
+for project in $API_TESTS
+do
+  echo "Running API tests for $project"
+  nosetests -v tempest/api/$project
+done
+
+popd
+echo "GATE PASS"
+

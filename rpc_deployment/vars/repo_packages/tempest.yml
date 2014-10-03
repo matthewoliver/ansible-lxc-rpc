@@ -24,3 +24,8 @@ git_dest: "/opt/{{ repo_path }}"
 git_install_branch: master
 
 pip_wheel_name: tempest
+
+service_pip_dependencies:
+  - nose
+  - testrepository
+  - testtools

@@ -17,6 +17,11 @@
 # this will ensure consistency when deploying.
 environment_version: 701a1a44b7d77473f3b930f21f78cddf
 
+# This is the location of the conf.d (split) configuration to ease
+# the management of large config files (i.e large openstack and
+# swift clusters).
+# conf_d: rpc_user_config.d/
+
 # User defined CIDR used for containers
 # Global cidr/s used for everything.
 cidr_networks:

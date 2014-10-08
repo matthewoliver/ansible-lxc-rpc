@@ -16,6 +16,7 @@
 # (c) 2014, Kevin Carter <kevin.carter@rackspace.com>
 
 import argparse
+import collections
 import datetime
 import hashlib
 import json
@@ -24,6 +25,8 @@ import Queue
 import random
 import tarfile
 import uuid
+
+from os.path import join, isdir, isfile
 
 try:
     import yaml
@@ -687,6 +690,34 @@ def md5_checker(localfile):
         raise SystemExit('This [ %s ] is not a file.' % localfile)
 
 
+def update_dict(d1, d2):
+    for k, v in d2.iteritems():
+        if isinstance(v, collections.Mapping):
+            r = update_dict(d1.get(k, {}), v)
+            d1[k] = r
+        else:
+            d1[k] = d2[k]
+    return d1
+
+
+def _load_extra_configuration(conf_d, config):
+    if not conf_d.startswith("/"):
+        conf_d = file_find(filename=conf_d)
+
+    if isdir(conf_d):
+        extra_configs = (join(conf_d, item)
+                         for item in os.listdir(conf_d)
+                         if isfile(join(conf_d, item)))
+        for conf in extra_configs:
+            try:
+                with open(conf, 'r') as config_stream:
+                    extra_config = yaml.load(config_stream)
+                    config = update_dict(config, extra_config)
+            except:
+                continue
+    return config
+
+
 def main():
     """Run the main application."""
     all_args = args()
@@ -701,12 +732,24 @@ def main():
     with open(user_config_file, 'rb') as f:
         user_defined_config = yaml.load(f.read())
 
+    # Check for a conf.d split directory
+    user_defined_conf_d = user_defined_config.get('conf_d')
+    if user_defined_conf_d:
+        user_defined_config = _load_extra_configuration(user_defined_conf_d,
+                                                        user_defined_config)
+
     # Get the contents of the system environment json
     environment_file = file_find(filename='rpc_environment.yml')
 
     # Load existing rpc environment json
     with open(environment_file, 'rb') as f:
         environment = yaml.safe_load(f.read())
+
+    # Check for a conf.d split directory
+    environment_conf_d = environment.get('conf_d')
+    if environment_conf_d:
+        environment = _load_extra_configuration(environment_conf_d,
+                                                environment)
 
     # Check the version of the environment file
     env_version = md5_checker(localfile=environment_file)

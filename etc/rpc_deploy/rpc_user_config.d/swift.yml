@@ -1,7 +1,8 @@
 ---
 # Setup swift group variables when using swift (Not required if not using swift)
-# part power is required under swift.
-# For account/container speciying min_part_hours and repl_number is all thats required
+# part power is required under swift. This can't be changed once the ring is built
+# For account/container speciying min_part_hours and repl_number is all that can be set.
+# These 2 can be set at the "swift" level to work as a default.
 # Alternatively defaults will be used (repl_number of 3, and min_part_hours of 1).
 # For storage policies, a name and unique index is required as well as repl_number and
 # min_part_hours which will be set to a default value if not specified.

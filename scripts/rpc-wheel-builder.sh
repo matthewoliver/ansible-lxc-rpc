@@ -1,4 +1,4 @@
----
+#!/usr/bin/env bash
 # Copyright 2014, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-repo_path: "{{ pip_wheel_name }}_{{ git_install_branch | replace('/', '_') }}"
+set -e -o -v
 
-## Git Source
-git_repo: https://github.com/openstack/keystonemiddleware
-git_fallback_repo: https://git.openstack.org/openstack/keystonemiddleware
-git_dest: "/opt/{{ repo_path }}"
-git_install_branch: master
+WORK_DIR="/opt/ansible-lxc-rpc"
+GIT_REPO="https://github.com/rcbops/ansible-lxc-rpc"
+REPO_PACKAGES_PATH="/opt/ansible-lxc-rpc/rpc_deployment/vars/repo_packages/"
+OUTPUT_WHEEL_PATH="/var/www/repo/python_packages"
+RELEASE=$1
 
-pip_wheel_name: keystonemiddleware
+rm -rf /tmp/rpc_wheels*
+rm -rf /tmp/pip*
+rm -rf "${WORK_DIR}"
+
+git clone "${GIT_REPO}" "${WORK_DIR}"
+pushd "${WORK_DIR}"
+  git checkout "${RELEASE}"
+popd
+
+${WORK_DIR}/scripts/rpc-wheel-builder.py -i "${REPO_PACKAGES_PATH}" \
+                                         -o "${OUTPUT_WHEEL_PATH}"/"${RELEASE}"

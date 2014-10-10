@@ -15,7 +15,7 @@
 
 from __future__ import print_function
 from optparse import OptionParser
-from os.path import exists
+from os.path import exists, join, dirname
 from swift.cli.ringbuilder import main as rb_main
 
 import pickle
@@ -215,6 +215,25 @@ def build_ring(section, conf, part_power, hosts, validate=False):
     if not validate:
         run_and_wait(rb_main, ["swift-ring-builder", build_file, "rebalance"])
 
+
+def _load_extra_configuration(conf_d, config):
+    if not conf_d.startswith("/"):
+        conf_d = file_find(filename=conf_d)
+
+    if isdir(conf_d):
+        extra_configs = (join(conf_d, item)
+                         for item in os.listdir(conf_d)
+                         if isfile(join(conf_d, item)))
+        for conf in extra_configs:
+            try:
+                with open(conf, 'r') as config_stream:
+                    extra_config = yaml.load(config_stream)
+                    config = update_dict(config, extra_config)
+            except:
+                continue
+    return config
+
+
 def main(setup):
     # load the yaml file
     try:
@@ -223,6 +242,25 @@ def main(setup):
     except Exception as ex:
         print("Failed to load yaml string %s" % (ex))
         return 1
+
+    # Build up a full config by loading in any conf.d files, incase
+    # they define more swift settings.
+    conf_d = _swift.get('conf_d')
+    if conf_d:
+        if not conf_d.startswith('/'):
+            # conf_d isn't a full path so now we need to find it.
+            # We are checking to see if it is relative from the local directory
+            # or relative from location of the main script.
+            for base in ('', dirname(setup))
+                conf_d_path = join(base, conf_d)
+                print('Conf.d: Checking "%s"' % (conf_d_path))
+                if exists(cond_d_path):
+                    conf_d = conf_d_path
+                    break
+        if exists(conf_d):
+            _swift = _load_extra_configuration(cond_d, _swift)
+        else:
+            print('Conf.d directory "%s" not found' % (conf_d))
 
     _hosts = {}
     if _swift.get("swift_hosts"):

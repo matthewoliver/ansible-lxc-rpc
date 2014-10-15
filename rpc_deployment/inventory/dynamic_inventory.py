@@ -17,6 +17,7 @@
 
 import argparse
 import datetime
+import collections
 import hashlib
 import json
 import os
@@ -687,6 +688,39 @@ def md5_checker(localfile):
         raise SystemExit('This [ %s ] is not a file.' % localfile)
 
 
+def _merge_dict(base_items, new_items):
+    """Recursively merge new_items into some base_items.
+
+    :param base_items: ``dict``
+    :param new_items: ``dict``
+    :return dictionary:
+    """
+    for key, value in new_items.iteritems():
+        if isinstance(value, collections.Mapping):
+            base_merge = _merge_dict(base_items.get(key, {}), value)
+            base_items[key] = base_merge
+        else:
+            base_items[key] = new_items[key]
+    return base_items
+
+
+def _extra_config(user_defined_config, base_dir):
+    """Discover new items in a conf.d directory and add the new values.
+
+    :param user_defined_config: ``dict``
+    :param base_dir: ``str``
+    """
+    for root_dir, _, files in os.walk(base_dir):
+        for name in files:
+            if name.endswith(('.yml', '.yaml')):
+                file_path = os.path.join(root_dir, name)
+                with open(file_path, 'rb') as f:
+                    _merge_dict(
+                        user_defined_config,
+                        yaml.safe_load(f.read())
+                    )
+
+
 def main():
     """Run the main application."""
     all_args = args()
@@ -695,11 +729,19 @@ def main():
     user_config_file = file_find(
         filename='rpc_user_config.yml', user_file=all_args.get('file')
     )
+
+    # Get the local path
     local_path = os.path.dirname(user_config_file)
 
     # Load the user defined configuration file
+    user_defined_config = dict()
     with open(user_config_file, 'rb') as f:
-        user_defined_config = yaml.load(f.read())
+        user_defined_config.update(yaml.safe_load(f.read()))
+
+    # Load anything in a conf.d directory if found
+    base_dir = os.path.join(local_path, 'conf.d')
+    if os.path.isdir(base_dir):
+        _extra_config(user_defined_config, base_dir)
 
     # Get the contents of the system environment json
     environment_file = file_find(filename='rpc_environment.yml')

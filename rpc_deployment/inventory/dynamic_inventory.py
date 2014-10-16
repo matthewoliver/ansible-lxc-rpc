@@ -17,7 +17,6 @@
 
 import argparse
 import datetime
-import collections
 import hashlib
 import json
 import os
@@ -696,7 +695,7 @@ def _merge_dict(base_items, new_items):
     :return dictionary:
     """
     for key, value in new_items.iteritems():
-        if isinstance(value, collections.Mapping):
+        if isinstance(value, dict):
             base_merge = _merge_dict(base_items.get(key, {}), value)
             base_items[key] = base_merge
         else:
@@ -717,7 +716,7 @@ def _extra_config(user_defined_config, base_dir):
                 with open(file_path, 'rb') as f:
                     _merge_dict(
                         user_defined_config,
-                        yaml.safe_load(f.read())
+                        yaml.safe_load(f.read()) or {}
                     )
 
 
